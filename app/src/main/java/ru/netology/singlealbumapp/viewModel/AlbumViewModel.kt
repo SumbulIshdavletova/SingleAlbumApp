@@ -6,6 +6,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import ru.netology.singlealbumapp.dto.Tracks
 import ru.netology.singlealbumapp.repository.AlbumRepository
 import ru.netology.singlealbumapp.repository.AlbumRepositoryImpl
 
@@ -20,6 +21,9 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun loadSongFile() = viewModelScope.launch {
         repository.getAllFlow().collect()
+    }
 
+    fun changePlayingStatus(tracks: Tracks, status: Boolean){
+        tracks.isPlaying = status
     }
 }

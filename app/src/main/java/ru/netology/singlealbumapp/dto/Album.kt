@@ -9,9 +9,12 @@ data class Album(
     val genre: String,
     val tracks: MutableList<Tracks>,
 
-)
+
+    )
 
 data class Tracks(
     val id: Long,
     val file: String,
-)
+    var isPlaying: Boolean = true,
+) {
+}

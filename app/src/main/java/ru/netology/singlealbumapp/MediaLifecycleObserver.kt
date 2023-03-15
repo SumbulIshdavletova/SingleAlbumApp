@@ -1,12 +1,21 @@
 package ru.netology.singlealbumapp
 
 import android.media.MediaPlayer
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import ru.netology.singlealbumapp.dto.Tracks
+import java.lang.String
+import java.net.URL
+import kotlin.Boolean
+import kotlin.Exception
+import kotlin.Int
+import kotlin.Throws
+import kotlin.Unit
 
 class MediaLifecycleObserver : LifecycleEventObserver {
     var player: MediaPlayer? = MediaPlayer()
+    var tracks: Tracks = Tracks(id = 0, file = "", isPlaying = false)
 
     fun play() {
         player?.setOnPreparedListener {
@@ -14,6 +23,7 @@ class MediaLifecycleObserver : LifecycleEventObserver {
         }
         player?.prepareAsync()
     }
+
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
