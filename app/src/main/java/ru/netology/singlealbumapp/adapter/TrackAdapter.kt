@@ -12,23 +12,22 @@ import ru.netology.singlealbumapp.dto.Tracks
 
 private val empty = Tracks(
     id = 0,
-    file = "",
-    isPlaying = false
+    file = ""
 )
 
 private val mediaObserver = MediaLifecycleObserver()
 
-interface OnInteractionListener1 {
+interface OnInteractionListener {
     fun onPlay(tracks: Tracks) {}
     fun onPause(tracks: Tracks) {}
 }
 
 class TrackAdapter(
-    private val onInteractionListener1: OnInteractionListener1,
+    private val onInteractionListener: OnInteractionListener,
 ) : ListAdapter<Tracks, TrackViewHolder>(TrackDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val binding = SongsCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return TrackViewHolder(binding, onInteractionListener1)
+        return TrackViewHolder(binding, onInteractionListener)
     }
 
 
@@ -41,39 +40,30 @@ class TrackAdapter(
 
 class TrackViewHolder(
     private val binding: SongsCardBinding,
-    private val onInteractionListener1: OnInteractionListener1,
+    private val onInteractionListener: OnInteractionListener,
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(track: Tracks) {
         binding.apply {
             songTitle.text = track.file
 
-            play.setOnClickListener {
-                onInteractionListener1.onPlay(track)
+       //     play.isChecked = mediaObserver.player?.isPlaying == true
 
-                checkIsPlaying(track, binding)
+            play.setOnClickListener {
+                pause.visibility = View.VISIBLE
+                play.visibility = View.GONE
+                onInteractionListener.onPlay(track)
             }
 
             pause.setOnClickListener {
-                onInteractionListener1.onPause(track)
-
-                checkIsPlaying(track, binding)
+                pause.visibility = View.GONE
+                play.visibility = View.VISIBLE
+                onInteractionListener.onPause(track)
             }
 
-            checkIsPlaying(track, binding)
-
         }
     }
 
-    private fun checkIsPlaying(track: Tracks, binding: SongsCardBinding) {
-        if (track.isPlaying) {
-            binding.pause.visibility = View.VISIBLE
-            binding.play.visibility = View.GONE
-        } else {
-            binding.pause.visibility = View.GONE
-            binding.play.visibility = View.VISIBLE
-        }
-    }
 }
 
 

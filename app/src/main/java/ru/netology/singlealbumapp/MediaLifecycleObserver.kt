@@ -15,7 +15,6 @@ import kotlin.Unit
 
 class MediaLifecycleObserver : LifecycleEventObserver {
     var player: MediaPlayer? = MediaPlayer()
-    var tracks: Tracks = Tracks(id = 0, file = "", isPlaying = false)
 
     fun play() {
         player?.setOnPreparedListener {

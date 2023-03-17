@@ -8,13 +8,10 @@ data class Album(
     val published: String,
     val genre: String,
     val tracks: MutableList<Tracks>,
-
-
-    )
+)
 
 data class Tracks(
     val id: Long,
     val file: String,
-    var isPlaying: Boolean = true,
 ) {
 }

@@ -10,6 +10,8 @@ import ru.netology.singlealbumapp.dto.Tracks
 import ru.netology.singlealbumapp.repository.AlbumRepository
 import ru.netology.singlealbumapp.repository.AlbumRepositoryImpl
 
+
+
 class AlbumViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: AlbumRepository = AlbumRepositoryImpl()
 
@@ -21,9 +23,5 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun loadSongFile() = viewModelScope.launch {
         repository.getAllFlow().collect()
-    }
-
-    fun changePlayingStatus(tracks: Tracks, status: Boolean){
-        tracks.isPlaying = status
     }
 }
