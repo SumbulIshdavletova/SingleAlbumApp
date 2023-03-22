@@ -13,5 +13,6 @@ data class Album(
 data class Tracks(
     val id: Long,
     val file: String,
+    var isPlaying: Boolean = false,
 ) {
 }

@@ -5,9 +5,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
+import androidx.core.view.allViews
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.room.InvalidationTracker
 import ru.netology.singlealbumapp.MediaLifecycleObserver
 import ru.netology.singlealbumapp.adapter.OnInteractionListener
 import ru.netology.singlealbumapp.adapter.TrackAdapter
@@ -34,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         val adapter = TrackAdapter(object : OnInteractionListener {
 
             override fun onPause(tracks: Tracks) {
-
+                viewModel.stopPlayingAll()
                 binding.pause.visibility = View.GONE
                 binding.play.visibility = View.VISIBLE
                 mediaObserver.apply {
@@ -46,12 +45,17 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onPlay(tracks: Tracks) {
+                viewModel.stopPlayingAll()
                 mediaObserver.player?.reset()
+                binding.list.allViews.apply {
+                    viewModel.stopPlayingAll()
+                }
                 binding.pause.visibility = View.VISIBLE
                 binding.play.visibility = View.GONE
 
                 mediaObserver.apply {
                     var songToPlay = tracks.file
+                    viewModel.isPlaying(tracks)
                     player?.setDataSource(SONG_URL + songToPlay)
 
                     player?.setOnCompletionListener {
@@ -59,14 +63,21 @@ class MainActivity : AppCompatActivity() {
 
                             player?.reset()
                             val nextSongId = tracks.id.toInt()
+                            var nextTrack = viewModel.data.value?.tracks?.get(nextSongId)
                             player?.setDataSource(
-                                SONG_URL + (viewModel.data.value?.tracks?.get(nextSongId))?.file.toString()
+                                SONG_URL + nextTrack?.file.toString()
                             )
+                            if (nextTrack != null) {
+                                viewModel.isPlaying(nextTrack)
+                            }
                             mediaObserver.play()
                         } else {
                             player?.reset()
                             val backToBeginning = viewModel.data.value?.tracks?.get(0)
                             songToPlay = backToBeginning?.file.toString()
+                            if (backToBeginning != null) {
+                                viewModel.isPlaying(backToBeginning)
+                            }
                             player?.setDataSource(SONG_URL + songToPlay)
                         }
                     }
@@ -77,18 +88,24 @@ class MainActivity : AppCompatActivity() {
         })
 
         binding.pause.setOnClickListener {
+            adapter.notifyDataSetChanged()
+            viewModel.stopPlayingAll()
             mediaObserver.player?.pause()
             binding.pause.visibility = View.GONE
             binding.play.visibility = View.VISIBLE
         }
 
         binding.play.setOnClickListener {
+            adapter.notifyDataSetChanged()
+            viewModel.stopPlayingAll()
             mediaObserver.apply {
                 player?.reset()
                 val backToBeginning = viewModel.data.value?.tracks?.get(0)
                 var songToPlay = backToBeginning?.file.toString()
                 player?.setDataSource(SONG_URL + songToPlay)
-
+                if (backToBeginning != null) {
+                    viewModel.isPlaying(backToBeginning)
+                }
             }.play()
             binding.pause.visibility = View.VISIBLE
             binding.play.visibility = View.GONE
@@ -96,8 +113,11 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.list.adapter = adapter
+        binding.list.layoutManager = manager
+
         viewModel.data.observe(this) {
             adapter.submitList(it.tracks)
+            adapter.notifyDataSetChanged()
             binding.genre.text = it.genre
             binding.artistName.text = it.artist
             binding.year.text = it.published
@@ -105,7 +125,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        binding.list.layoutManager = manager
 
         setContentView(binding.root)
     }

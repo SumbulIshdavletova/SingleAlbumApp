@@ -1,19 +1,18 @@
 package ru.netology.singlealbumapp.adapter
 
+import android.database.Observable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import okhttp3.internal.notify
+import okhttp3.internal.notifyAll
 import ru.netology.singlealbumapp.MediaLifecycleObserver
 import ru.netology.singlealbumapp.databinding.SongsCardBinding
 import ru.netology.singlealbumapp.dto.Tracks
 
-private val empty = Tracks(
-    id = 0,
-    file = ""
-)
 
 private val mediaObserver = MediaLifecycleObserver()
 
@@ -43,29 +42,40 @@ class TrackViewHolder(
     private val onInteractionListener: OnInteractionListener,
 ) : RecyclerView.ViewHolder(binding.root) {
 
+
     fun bind(track: Tracks) {
         binding.apply {
             songTitle.text = track.file
 
-       //     play.isChecked = mediaObserver.player?.isPlaying == true
+
 
             play.setOnClickListener {
                 pause.visibility = View.VISIBLE
                 play.visibility = View.GONE
                 onInteractionListener.onPlay(track)
+                play.isChecked = track.isPlaying
             }
 
             pause.setOnClickListener {
                 pause.visibility = View.GONE
                 play.visibility = View.VISIBLE
+                play.isChecked = track.isPlaying
                 onInteractionListener.onPause(track)
+
+
             }
 
+            if (!track.isPlaying) {
+                pause.visibility = View.GONE
+                play.visibility = View.VISIBLE
+            } else {
+                pause.visibility = View.VISIBLE
+                play.visibility = View.GONE
+            }
         }
     }
 
 }
-
 
 
 class TrackDiffCallback : DiffUtil.ItemCallback<Tracks>() {
