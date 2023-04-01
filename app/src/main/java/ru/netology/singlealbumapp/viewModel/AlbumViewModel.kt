@@ -1,9 +1,7 @@
 package ru.netology.singlealbumapp.viewModel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.netology.singlealbumapp.dto.Tracks
@@ -24,19 +22,20 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         repository.getAllFlow().collect()
     }
 
+
     fun stopPlayingAll() {
-        val tracks = data.value?.tracks
-        if (tracks != null) {
-            for (t in tracks) {
-                t.isPlaying = false
-            }
+        data.value?.tracks?.forEach {
+            val i = arrayOf(it)
+                for (t in i) {
+                    t.isPlaying = false
+                }
 
         }
-        data.value
-
     }
 
     fun isPlaying(tracks: Tracks) {
-        tracks.isPlaying = true
+        data.value?.tracks?.apply {
+            tracks.isPlaying = true
+        }
     }
 }

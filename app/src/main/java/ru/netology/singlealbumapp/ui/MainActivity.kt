@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.allViews
 import androidx.recyclerview.widget.LinearLayoutManager
+import okhttp3.internal.notify
 import ru.netology.singlealbumapp.MediaLifecycleObserver
 import ru.netology.singlealbumapp.adapter.OnInteractionListener
 import ru.netology.singlealbumapp.adapter.TrackAdapter
@@ -32,6 +33,11 @@ class MainActivity : AppCompatActivity() {
 
         val adapter = TrackAdapter(object : OnInteractionListener {
 
+            override fun pauseAll() {
+                viewModel.stopPlayingAll()
+                binding.list.adapter?.notifyDataSetChanged()
+            }
+
             override fun onPause(tracks: Tracks) {
                 viewModel.stopPlayingAll()
                 binding.pause.visibility = View.GONE
@@ -47,15 +53,12 @@ class MainActivity : AppCompatActivity() {
             override fun onPlay(tracks: Tracks) {
                 viewModel.stopPlayingAll()
                 mediaObserver.player?.reset()
-                binding.list.allViews.apply {
-                    viewModel.stopPlayingAll()
-                }
                 binding.pause.visibility = View.VISIBLE
                 binding.play.visibility = View.GONE
-
+                viewModel.isPlaying(tracks)
                 mediaObserver.apply {
                     var songToPlay = tracks.file
-                    viewModel.isPlaying(tracks)
+
                     player?.setDataSource(SONG_URL + songToPlay)
 
                     player?.setOnCompletionListener {
@@ -111,7 +114,6 @@ class MainActivity : AppCompatActivity() {
             binding.play.visibility = View.GONE
         }
 
-
         binding.list.adapter = adapter
         binding.list.layoutManager = manager
 
@@ -123,8 +125,6 @@ class MainActivity : AppCompatActivity() {
             binding.year.text = it.published
             binding.albumTitle.text = it.title
         }
-
-
 
         setContentView(binding.root)
     }

@@ -4,26 +4,28 @@ import android.database.Observable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView.OnItemSelectedListener
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import okhttp3.internal.notify
 import okhttp3.internal.notifyAll
 import ru.netology.singlealbumapp.MediaLifecycleObserver
+import ru.netology.singlealbumapp.R
 import ru.netology.singlealbumapp.databinding.SongsCardBinding
 import ru.netology.singlealbumapp.dto.Tracks
 
 
-private val mediaObserver = MediaLifecycleObserver()
-
 interface OnInteractionListener {
     fun onPlay(tracks: Tracks) {}
     fun onPause(tracks: Tracks) {}
+    fun pauseAll() {}
 }
 
 class TrackAdapter(
     private val onInteractionListener: OnInteractionListener,
 ) : ListAdapter<Tracks, TrackViewHolder>(TrackDiffCallback()) {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val binding = SongsCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TrackViewHolder(binding, onInteractionListener)
@@ -34,6 +36,7 @@ class TrackAdapter(
         val track = getItem(position)
         holder.bind(track)
     }
+
 
 }
 
@@ -47,35 +50,37 @@ class TrackViewHolder(
         binding.apply {
             songTitle.text = track.file
 
-
-
-            play.setOnClickListener {
+            if (track.isPlaying) {
                 pause.visibility = View.VISIBLE
                 play.visibility = View.GONE
-                onInteractionListener.onPlay(track)
-                play.isChecked = track.isPlaying
+                pause.setOnClickListener {
+                    onInteractionListener.onPause(track)
+                    pause.visibility = View.GONE
+                    play.visibility = View.VISIBLE
+                }
+            } else {
+                pause.visibility = View.GONE
+                play.visibility = View.VISIBLE
+                play.setOnClickListener {
+
+                   onInteractionListener.pauseAll()
+                    onInteractionListener.onPlay(track)
+                    pause.visibility = View.VISIBLE
+                    play.visibility = View.GONE
+                }
             }
 
             pause.setOnClickListener {
-                pause.visibility = View.GONE
-                play.visibility = View.VISIBLE
-                play.isChecked = track.isPlaying
                 onInteractionListener.onPause(track)
-
-
+                onInteractionListener.pauseAll()
+                binding.pause.visibility = View.GONE
+                binding.play.visibility = View.VISIBLE
             }
 
-            if (!track.isPlaying) {
-                pause.visibility = View.GONE
-                play.visibility = View.VISIBLE
-            } else {
-                pause.visibility = View.VISIBLE
-                play.visibility = View.GONE
             }
         }
     }
 
-}
 
 
 class TrackDiffCallback : DiffUtil.ItemCallback<Tracks>() {
