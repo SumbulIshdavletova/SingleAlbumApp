@@ -8,23 +8,19 @@ import android.widget.AdapterView.OnItemSelectedListener
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import okhttp3.internal.notify
-import okhttp3.internal.notifyAll
-import ru.netology.singlealbumapp.MediaLifecycleObserver
-import ru.netology.singlealbumapp.R
 import ru.netology.singlealbumapp.databinding.SongsCardBinding
-import ru.netology.singlealbumapp.dto.Tracks
+import ru.netology.singlealbumapp.dto.Track
 
 
 interface OnInteractionListener {
-    fun onPlay(tracks: Tracks) {}
-    fun onPause(tracks: Tracks) {}
+    fun onPlay(tracks: Track) {}
+    fun onPause(tracks: Track) {}
     fun pauseAll() {}
 }
 
 class TrackAdapter(
     private val onInteractionListener: OnInteractionListener,
-) : ListAdapter<Tracks, TrackViewHolder>(TrackDiffCallback()) {
+) : ListAdapter<Track, TrackViewHolder>(TrackDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val binding = SongsCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -46,7 +42,7 @@ class TrackViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
 
 
-    fun bind(track: Tracks) {
+    fun bind(track: Track) {
         binding.apply {
             songTitle.text = track.file
 
@@ -83,12 +79,12 @@ class TrackViewHolder(
 
 
 
-class TrackDiffCallback : DiffUtil.ItemCallback<Tracks>() {
-    override fun areItemsTheSame(oldItem: Tracks, newItem: Tracks): Boolean {
+class TrackDiffCallback : DiffUtil.ItemCallback<Track>() {
+    override fun areItemsTheSame(oldItem: Track, newItem: Track): Boolean {
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: Tracks, newItem: Tracks): Boolean {
+    override fun areContentsTheSame(oldItem: Track, newItem: Track): Boolean {
         return oldItem == newItem
     }
 

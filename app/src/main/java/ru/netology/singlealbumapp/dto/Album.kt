@@ -7,10 +7,10 @@ data class Album(
     val artist: String,
     val published: String,
     val genre: String,
-    val tracks: MutableList<Tracks>,
+    val tracks: MutableList<Track>,
 )
 
-data class Tracks(
+data class Track(
     val id: Long,
     val file: String,
     var isPlaying: Boolean = false,

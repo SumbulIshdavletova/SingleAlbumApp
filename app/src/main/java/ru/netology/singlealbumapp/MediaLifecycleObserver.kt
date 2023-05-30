@@ -4,13 +4,6 @@ import android.media.MediaPlayer
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import ru.netology.singlealbumapp.dto.Tracks
-import java.lang.String
-import java.net.URL
-import kotlin.Boolean
-import kotlin.Exception
-import kotlin.Int
-import kotlin.Throws
 import kotlin.Unit
 
 class MediaLifecycleObserver : LifecycleEventObserver {

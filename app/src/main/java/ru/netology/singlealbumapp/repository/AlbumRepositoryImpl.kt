@@ -1,8 +1,5 @@
 package ru.netology.singlealbumapp.repository
 
-
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import ru.netology.singlealbumapp.api.AlbumApi
 import ru.netology.singlealbumapp.dto.Album
 import ru.netology.singlealbumapp.error.ApiError
@@ -12,8 +9,8 @@ import java.io.IOException
 
 class AlbumRepositoryImpl() : AlbumRepository {
 
-    override fun getAllFlow(): Flow<Album> = flow {
-
+    override suspend fun getAlbum(): Album {
+        var album: Album
         try {
             val response = AlbumApi.service.getAll()
             if (!response.isSuccessful) {
@@ -21,12 +18,13 @@ class AlbumRepositoryImpl() : AlbumRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            emit(body)
+            album = body
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
             throw UnknownError
         }
+        return album
     }
 }
 

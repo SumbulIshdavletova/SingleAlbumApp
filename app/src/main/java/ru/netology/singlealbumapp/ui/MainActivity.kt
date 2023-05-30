@@ -1,6 +1,10 @@
 package ru.netology.singlealbumapp.ui
 
+import android.content.Context
 import android.media.MediaPlayer
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -12,7 +16,7 @@ import ru.netology.singlealbumapp.MediaLifecycleObserver
 import ru.netology.singlealbumapp.adapter.OnInteractionListener
 import ru.netology.singlealbumapp.adapter.TrackAdapter
 import ru.netology.singlealbumapp.databinding.ActivityMainBinding
-import ru.netology.singlealbumapp.dto.Tracks
+import ru.netology.singlealbumapp.dto.Track
 import ru.netology.singlealbumapp.viewModel.AlbumViewModel
 
 
@@ -38,7 +42,7 @@ class MainActivity : AppCompatActivity() {
                 binding.list.adapter?.notifyDataSetChanged()
             }
 
-            override fun onPause(tracks: Tracks) {
+            override fun onPause(tracks: Track) {
                 viewModel.stopPlayingAll()
                 binding.pause.visibility = View.GONE
                 binding.play.visibility = View.VISIBLE
@@ -50,12 +54,12 @@ class MainActivity : AppCompatActivity() {
 
             }
 
-            override fun onPlay(tracks: Tracks) {
+            override fun onPlay(tracks: Track) {
                 viewModel.stopPlayingAll()
                 mediaObserver.player?.reset()
                 binding.pause.visibility = View.VISIBLE
                 binding.play.visibility = View.GONE
-                viewModel.isPlaying(tracks)
+                viewModel.playTrack(tracks)
                 mediaObserver.apply {
                     var songToPlay = tracks.file
 
@@ -66,20 +70,20 @@ class MainActivity : AppCompatActivity() {
 
                             player?.reset()
                             val nextSongId = tracks.id.toInt()
-                            var nextTrack = viewModel.data.value?.tracks?.get(nextSongId)
+                            var nextTrack = viewModel.albumLiveData().value?.tracks?.get(nextSongId)
                             player?.setDataSource(
                                 SONG_URL + nextTrack?.file.toString()
                             )
                             if (nextTrack != null) {
-                                viewModel.isPlaying(nextTrack)
+                                viewModel.playTrack(nextTrack)
                             }
                             mediaObserver.play()
                         } else {
                             player?.reset()
-                            val backToBeginning = viewModel.data.value?.tracks?.get(0)
+                            val backToBeginning = viewModel.albumLiveData().value?.tracks?.get(0)
                             songToPlay = backToBeginning?.file.toString()
                             if (backToBeginning != null) {
-                                viewModel.isPlaying(backToBeginning)
+                                viewModel.playTrack(backToBeginning)
                             }
                             player?.setDataSource(SONG_URL + songToPlay)
                         }
@@ -103,11 +107,11 @@ class MainActivity : AppCompatActivity() {
             viewModel.stopPlayingAll()
             mediaObserver.apply {
                 player?.reset()
-                val backToBeginning = viewModel.data.value?.tracks?.get(0)
+                val backToBeginning = viewModel.albumLiveData().value?.tracks?.get(0)
                 var songToPlay = backToBeginning?.file.toString()
                 player?.setDataSource(SONG_URL + songToPlay)
                 if (backToBeginning != null) {
-                    viewModel.isPlaying(backToBeginning)
+                    viewModel.playTrack(backToBeginning)
                 }
             }.play()
             binding.pause.visibility = View.VISIBLE
@@ -117,7 +121,7 @@ class MainActivity : AppCompatActivity() {
         binding.list.adapter = adapter
         binding.list.layoutManager = manager
 
-        viewModel.data.observe(this) {
+  viewModel.albumLiveData().observe(this) {
             adapter.submitList(it.tracks)
             adapter.notifyDataSetChanged()
             binding.genre.text = it.genre
@@ -125,9 +129,34 @@ class MainActivity : AppCompatActivity() {
             binding.year.text = it.published
             binding.albumTitle.text = it.title
         }
+//        adapter.submitList(viewModel.data.tracks)
+//        adapter.notifyDataSetChanged()
+//        binding.genre.text = viewModel.data.genre
+//        binding.artistName.text = viewModel.data.artist
+//        binding.year.text = viewModel.data.published
+//        binding.albumTitle.text = viewModel.data.title
 
         setContentView(binding.root)
     }
 
+
+    private fun checkForInternet(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork ?: return false
+            val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+            return when {
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                else -> false
+            }
+        } else {
+            @Suppress("DEPRECATION") val networkInfo =
+                connectivityManager.activeNetworkInfo ?: return false
+            @Suppress("DEPRECATION")
+            return networkInfo.isConnected
+        }
+    }
 
 }
