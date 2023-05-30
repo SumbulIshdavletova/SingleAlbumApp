@@ -7,6 +7,7 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.allViews
@@ -121,14 +122,22 @@ class MainActivity : AppCompatActivity() {
         binding.list.adapter = adapter
         binding.list.layoutManager = manager
 
-  viewModel.albumLiveData().observe(this) {
-            adapter.submitList(it.tracks)
-            adapter.notifyDataSetChanged()
-            binding.genre.text = it.genre
-            binding.artistName.text = it.artist
-            binding.year.text = it.published
-            binding.albumTitle.text = it.title
+        if (checkForInternet(applicationContext)){
+            viewModel.albumLiveData().observe(this) {
+                adapter.submitList(it.tracks)
+                adapter.notifyDataSetChanged()
+                binding.genre.text = it.genre
+                binding.artistName.text = it.artist
+                binding.year.text = it.published
+                binding.albumTitle.text = it.title
+            }
+        } else {
+            val text = "No internet connection"
+            Toast.makeText(applicationContext, text, Toast.LENGTH_LONG).show()
+
         }
+
+
 //        adapter.submitList(viewModel.data.tracks)
 //        adapter.notifyDataSetChanged()
 //        binding.genre.text = viewModel.data.genre
